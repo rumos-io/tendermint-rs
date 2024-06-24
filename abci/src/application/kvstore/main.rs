@@ -28,7 +28,7 @@ struct Opt {
     quiet: bool,
 }
 
-fn main() -> Result<(), tracing::Error>{
+fn main() -> Result<(), tracing::Error> {
     let opt: Opt = Opt::from_args();
     let log_level = if opt.quiet {
         LevelFilter::OFF

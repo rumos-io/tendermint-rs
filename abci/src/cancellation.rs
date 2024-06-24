@@ -17,10 +17,9 @@ impl CancellationSource {
     }
 
     pub fn panic_if_cancelled() {
-      if Self::is_cancelled()
-      {
-        panic!("{CANCEL_PANIC_MSG}")
-      }
+        if Self::is_cancelled() {
+            panic!("{CANCEL_PANIC_MSG}")
+        }
     }
 
     pub fn cancel() {
@@ -31,7 +30,7 @@ impl CancellationSource {
         TokenDropGuard::new()
     }
 
-    pub fn cancel_and_panic(&self) -> ! {
+    pub fn cancel_and_panic() -> ! {
         Self::cancel();
         Self::panic_if_cancelled();
         unreachable!()
