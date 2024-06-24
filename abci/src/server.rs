@@ -101,9 +101,11 @@ impl<App: Application> Server<App> {
     }
 
     fn handle_client(stream: TcpStream, addr: String, app: App, read_buf_size: usize) {
+        let token = CancellationToken::new();
+
         let mut codec = ServerCodec::new(stream, read_buf_size);
         info!("Listening for incoming requests from {}", addr);
-        loop {
+         while !token.is_cancelled() {
             let request = match codec.next() {
                 Some(result) => match result {
                     Ok(r) => r,
