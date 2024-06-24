@@ -7,7 +7,10 @@ use std::{
 
 use tracing::{error, info};
 
-use crate::{application::RequestDispatcher, codec::ServerCodec, error::Error, Application};
+use crate::{
+    application::RequestDispatcher, cancellation::CancellationToken, codec::ServerCodec,
+    error::Error, Application,
+};
 
 /// The size of the read buffer for each incoming connection to the ABCI
 /// server (1MB).
@@ -74,12 +77,16 @@ pub struct Server<App> {
 impl<App: Application> Server<App> {
     /// Initiate a blocking listener for incoming connections.
     pub fn listen(self) -> Result<(), Error> {
-        loop {
+        let token = CancellationToken::new();
+
+        while !token.is_cancelled() {
             let (stream, addr) = self.listener.accept().map_err(Error::io)?;
             let addr = addr.to_string();
             info!("Incoming connection from: {}", addr);
             self.spawn_client_handler(stream, addr);
         }
+
+        Ok(())
     }
 
     /// Getter for this server's local address.
