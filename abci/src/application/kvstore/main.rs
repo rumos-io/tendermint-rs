@@ -28,7 +28,7 @@ struct Opt {
     quiet: bool,
 }
 
-fn main() {
+fn main() -> Result<(), tracing::Error>{
     let opt: Opt = Opt::from_args();
     let log_level = if opt.quiet {
         LevelFilter::OFF
@@ -44,5 +44,5 @@ fn main() {
         .bind(format!("{}:{}", opt.host, opt.port), app)
         .unwrap();
     std::thread::spawn(move || driver.run());
-    server.listen().unwrap();
+    server.listen()
 }
