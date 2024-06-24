@@ -8,7 +8,7 @@ use std::{
 use tracing::{error, info};
 
 use crate::{
-    application::RequestDispatcher, cancellation::CancellationToken, codec::ServerCodec,
+    application::RequestDispatcher, cancellation::CancellationSource, codec::ServerCodec,
     error::Error, Application,
 };
 
@@ -76,10 +76,8 @@ pub struct Server<App> {
 
 impl<App: Application> Server<App> {
     /// Initiate a blocking listener for incoming connections.
-    pub fn listen(self) -> Result<(), Error> {
-        let token = CancellationToken::new();
-
-        while !token.is_cancelled() {
+    pub fn listen(self) -> Result<(), Error> { 
+        while !CancellationSource::is_cancelled() {
             let (stream, addr) = self.listener.accept().map_err(Error::io)?;
             let addr = addr.to_string();
             info!("Incoming connection from: {}", addr);
@@ -101,11 +99,9 @@ impl<App: Application> Server<App> {
     }
 
     fn handle_client(stream: TcpStream, addr: String, app: App, read_buf_size: usize) {
-        let token = CancellationToken::new();
-
         let mut codec = ServerCodec::new(stream, read_buf_size);
         info!("Listening for incoming requests from {}", addr);
-         while !token.is_cancelled() {
+        while !CancellationSource::is_cancelled() {
             let request = match codec.next() {
                 Some(result) => match result {
                     Ok(r) => r,
