@@ -77,17 +77,20 @@ pub struct Server<App> {
 impl<App: Application> Server<App> {
     /// Initiate a blocking listener for incoming connections.
     pub fn listen(self) -> Result<(), Error> { 
-        loop {
-            let (stream, addr) = self.listener.accept().map_err(Error::io)?;
-            let addr = addr.to_string();
-            info!("Incoming connection from: {}", addr);
-            self.spawn_client_handler(stream, addr);
 
-            if CancellationSource::is_cancelled()
-            {
-                return Ok(());
+        let _ = thread::spawn( move || {
+            loop {
+                let (stream, addr) = self.listener.accept().map_err(Error::io).expect( "failed to accept connection");
+                let addr = addr.to_string();
+                info!("Incoming connection from: {}", addr);
+                self.spawn_client_handler(stream, addr);
             }
-        }
+           
+        });
+        
+        while !CancellationSource::is_cancelled() { }
+
+        Ok(())
     }
 
     /// Getter for this server's local address.
