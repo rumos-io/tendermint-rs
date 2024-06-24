@@ -21,7 +21,10 @@ impl CancellationToken {
     }
 
     pub fn panic_if_cancelled(&self) {
+      if self.is_cancelled()
+      {
         panic!("{CANCEL_PANIC_MSG}")
+      }
     }
 
     pub fn cancel(&self) {
