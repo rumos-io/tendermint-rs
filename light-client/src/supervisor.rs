@@ -715,6 +715,7 @@ mod tests {
         // FIXME: currently this test does not test what it is supposed to test,
         // because MockIo returns an InvalidRequest error. This was previously
         // treated as a NoWitnessLeft error, which was misclassified.
+        #[allow(unused_qualifications)]
         match result {
             Err(Error(ErrorDetail::Io(e), _)) => match e.source {
                 crate::components::io::IoErrorDetail::Rpc(e) => match e.source {

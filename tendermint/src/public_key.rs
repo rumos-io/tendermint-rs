@@ -108,6 +108,7 @@ where
     D: Deserializer<'de>,
 {
     let v = Value::deserialize(deserializer)?;
+    #[allow(unused_qualifications)]
     if v.as_object()
         .map(|obj| obj.contains_key("Sum"))
         .unwrap_or(false)
@@ -143,6 +144,7 @@ impl TryFrom<RawPublicKey> for PublicKey {
 
 impl From<PublicKey> for RawPublicKey {
     fn from(value: PublicKey) -> Self {
+        #[allow(unused_qualifications)]
         match value {
             PublicKey::Ed25519(ref pk) => RawPublicKey {
                 sum: Some(tendermint_proto::crypto::public_key::Sum::Ed25519(
