@@ -11,10 +11,10 @@ pub fn uuid_str() -> String {
     let mut bytes = [0; 16];
     getrandom(&mut bytes).expect("RNG failure!");
 
-    let uuid = uuid::Builder::from_bytes(bytes)
+    let mut builder = uuid::Builder::from_bytes(bytes);
+    builder
         .set_variant(uuid::Variant::RFC4122)
-        .set_version(uuid::Version::Random)
-        .build();
+        .set_version(uuid::Version::Random);
 
-    uuid.to_string()
+    builder.into_uuid().to_string()
 }

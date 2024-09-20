@@ -241,6 +241,7 @@ fn non_absent_vote(
 // TODO: We plan to add Lightweight MBT for `voting_power_in` in the near future
 #[cfg(test)]
 mod tests {
+    use alloc::vec;
     use tendermint::trust_threshold::TrustThresholdFraction;
     use tendermint_testgen::{
         light_block::generate_signed_header, Commit, Generator, Header,

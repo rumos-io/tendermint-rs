@@ -230,6 +230,7 @@ pub trait VerificationPredicates: Send + Sync {
 mod tests {
     use core::{convert::TryInto, time::Duration};
 
+    use alloc::vec;
     use tendermint::{block::CommitSig, validator::Set};
     use tendermint_testgen::{
         light_block::{LightBlock as TestgenLightBlock, TmLightBlock},

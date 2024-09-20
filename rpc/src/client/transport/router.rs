@@ -1,4 +1,5 @@
 //! Event routing for subscriptions.
+#![allow(unexpected_cfgs)]
 
 use alloc::collections::{BTreeMap as HashMap, BTreeSet as HashSet};
 
@@ -129,6 +130,7 @@ pub enum PublishResult {
     Success,
     NoSubscribers,
     // All subscriptions for the given query have disconnected.
+    #[allow(dead_code)]
     AllDisconnected(String),
 }
 

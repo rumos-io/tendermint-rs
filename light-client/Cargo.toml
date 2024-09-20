@@ -41,7 +41,7 @@ tendermint-light-client-verifier = { version = "0.29.1", path = "../light-client
 
 contracts = { version = "0.6.2", default-features = false }
 crossbeam-channel = { version = "0.4.2", default-features = false }
-derive_more = { version = "0.99.5", default-features = false, features = ["display"] }
+derive_more = { version = "1", default-features = false, features = ["display"] }
 futures = { version = "0.3.4", default-features = false }
 serde = { version = "1.0.106", default-features = false }
 serde_cbor = { version = "0.11.1", default-features = false, features = ["alloc", "std"] }
@@ -57,9 +57,9 @@ tendermint-testgen = { path = "../testgen", default-features = false }
 
 serde_json = { version = "1.0.51", default-features = false }
 gumdrop = { version = "0.8.0", default-features = false }
-rand = { version = "0.7.3", default-features = false }
+rand = { version = "0.8", default-features = false }
 tempfile = { version = "3.2.0", default-features = false }
-proptest = { version = "0.10.1", default-features = false, features = ["std"] }
+proptest = { version = "1.5", default-features = false, features = ["std"] }
 
 [[example]]
 name = "light_client"

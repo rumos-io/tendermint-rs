@@ -285,6 +285,7 @@ mod tests {
         Verdict, Verifier,
     };
 
+    #[allow(dead_code)]
     #[cfg(feature = "rust-crypto")]
     #[derive(Clone, Debug, PartialEq, Eq)]
     struct ProdVerifierSupportsCommonDerivedTraits {

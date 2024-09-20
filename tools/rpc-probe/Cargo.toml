@@ -28,4 +28,4 @@ structopt = "0.3"
 subtle-encoding = "0.5"
 thiserror = "1.0"
 tokio = { version = "1.20", features = [ "full" ] }
-uuid = "0.8"
+uuid = "1.10"
