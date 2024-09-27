@@ -8,7 +8,7 @@ mod client;
 mod codec;
 pub mod error;
 mod server;
-// pub mod cancellation;
+pub mod cancellation;
 
 // Common exports
 // Example applications
