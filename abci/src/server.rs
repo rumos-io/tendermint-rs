@@ -75,6 +75,10 @@ pub struct Server<App> {
 }
 
 impl<App: Application> Server<App> {
+    pub fn token(&mut self) -> CancellationToken {
+        self.cancellation_source.token()
+    }
+
     /// Initiate a blocking listener for incoming connections.
     pub fn listen(mut self) -> Result<(), Error> {
         let mut token = self.cancellation_source.token();
