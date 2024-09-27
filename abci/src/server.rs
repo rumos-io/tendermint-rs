@@ -5,12 +5,10 @@ use std::{
     thread,
 };
 
+use gancellation_token::{CancellationSource, CancellationToken};
 use tracing::{error, info};
 
-use crate::{
-    application::RequestDispatcher, cancellation::CancellationSource, codec::ServerCodec,
-    error::Error, Application,
-};
+use crate::{application::RequestDispatcher, codec::ServerCodec, error::Error, Application};
 
 /// The size of the read buffer for each incoming connection to the ABCI
 /// server (1MB).
@@ -49,6 +47,7 @@ impl ServerBuilder {
             listener,
             local_addr,
             read_buf_size: self.read_buf_size,
+            cancellation_source: CancellationSource::new(),
         })
     }
 }
@@ -72,33 +71,39 @@ pub struct Server<App> {
     listener: TcpListener,
     local_addr: String,
     read_buf_size: usize,
+    cancellation_source: CancellationSource,
 }
 
 impl<App: Application> Server<App> {
     /// Initiate a blocking listener for incoming connections.
-    pub fn listen(self) -> Result<(), Error> {
-        let _ = thread::spawn(move || while !CancellationSource::is_cancelled() {
-            let connection = self
-                .listener
-                .accept()
-                .map_err(Error::io);
+    pub fn listen(mut self) -> Result<(), Error> {
+        let mut token = self.cancellation_source.token();
+
+        let _ = thread::spawn(move || {
+            while !token.is_cancelled() {
+                let connection = self.listener.accept().map_err(Error::io);
 
                 match connection {
-                    Ok( (stream, addr) ) => {
+                    Ok((stream, addr)) => {
                         let addr = addr.to_string();
                         info!("Incoming connection from: {}", addr);
-                        self.spawn_client_handler(stream, addr);
+                        Self::spawn_client_handler(
+                            stream,
+                            addr,
+                            self.app.clone(),
+                            self.read_buf_size,
+                            token.clone(),
+                        );
                     },
                     Err(err) => {
-                        error!( "Error receiving connection: {err}");
-                        CancellationSource::cancel();
+                        error!("Error receiving connection: {err}");
+                        token.cancel();
                     },
                 }
-
-          
+            }
         });
 
-        while !CancellationSource::is_cancelled() {
+        while !self.cancellation_source.is_cancelled() {
             std::thread::sleep(std::time::Duration::from_millis(100))
         }
 
@@ -110,16 +115,26 @@ impl<App: Application> Server<App> {
         self.local_addr.clone()
     }
 
-    fn spawn_client_handler(&self, stream: TcpStream, addr: String) {
-        let app = self.app.clone();
-        let read_buf_size = self.read_buf_size;
-        let _ = thread::spawn(move || Self::handle_client(stream, addr, app, read_buf_size));
+    fn spawn_client_handler(
+        stream: TcpStream,
+        addr: String,
+        app: App,
+        read_buf_size: usize,
+        token: CancellationToken,
+    ) {
+        let _ = thread::spawn(move || Self::handle_client(stream, addr, app, read_buf_size, token));
     }
 
-    fn handle_client(stream: TcpStream, addr: String, app: App, read_buf_size: usize) {
+    fn handle_client(
+        stream: TcpStream,
+        addr: String,
+        app: App,
+        read_buf_size: usize,
+        token: CancellationToken,
+    ) {
         let mut codec = ServerCodec::new(stream, read_buf_size);
         info!("Listening for incoming requests from {}", addr);
-        while !CancellationSource::is_cancelled() {
+        while !token.is_cancelled() {
             let request = match codec.next() {
                 Some(result) => match result {
                     Ok(r) => r,
@@ -136,7 +151,7 @@ impl<App: Application> Server<App> {
                     return;
                 },
             };
-            let response = app.handle(request);
+            let response = app.handle(request, &token);
             if let Err(e) = codec.send(response) {
                 error!("Failed sending response to client {}: {:?}", addr, e);
                 return;

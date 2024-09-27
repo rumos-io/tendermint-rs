@@ -38,3 +38,4 @@ tracing = { version = "0.1", default-features = false }
 flex-error = { version = "0.4.4", default-features = false }
 structopt = { version = "0.3", optional = true, default-features = false }
 tracing-subscriber = { version = "0.3", optional = true, default-features = false }
+gancellation-token = {git = "https://github.com/NYBACHOK/gancellation-token.git"}
